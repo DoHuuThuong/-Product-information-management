@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý thông tin sản phẩm</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .btn-main {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background-color: #70AE98; 
+            border-color: #ffffff; 
+        }
+        .btn-main:hover {
+            background-color: #2E8364;
+            border-color: #ffffff;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        #ketQuaThongBao p {
+            margin-top: 15px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>    
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Quản lý thông tin sản phẩm</h1>
+
+        <div class="text-center">
+            <button class="btn btn-main" onclick="hienThiForm('formThem')">Thêm Sản Phẩm</button>
+            <button class="btn btn-main" onclick="hienThiForm('formCapNhat')">Cập Nhật Sản Phẩm</button>
+            <button class="btn btn-main" onclick="hienThiForm('formXoa')">Xóa Sản Phẩm</button>
+            <button class="btn btn-main" onclick="hienThiForm('formTimKiem')">Tìm Kiếm Sản Phẩm</button>
+        </div>
+
+        <!-- Phần tử mới để hiển thị thông báo -->
+        <div id="ketQuaThongBao" class="text-center mt-3"></div>
+    
+        <!-- Form Thêm Sản Phẩm -->
+        <div id="formThem" class="form hidden">
+            <div class="form-group">
+                <input type="text" class="form-control" id="maSanPhamThem" placeholder="Mã Sản Phẩm">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="tenSanPhamThem" placeholder="Tên Sản Phẩm">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="loaiSanPhamThem" placeholder="Loại Sản Phẩm">
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-control" id="ngaySanXuatThem" placeholder="Ngày Sản Xuất">
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-control" id="ngayHetHanThem" placeholder="Ngày Hết Hạn">
+            </div>
+            <button class="btn btn-main" onclick="themSanPham()">Thêm Sản Phẩm</button>
+        </div>
+    
+        <!-- Form Cập Nhật Sản Phẩm -->
+        <div id="formCapNhat" class="form hidden">
+            <div class="form-group">
+                <input type="text" class="form-control" id="updateMaSanPham" placeholder="Mã Sản Phẩm cần cập nhật">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="updateTenSanPham" placeholder="Tên Sản Phẩm mới">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="updateLoaiSanPham" placeholder="Loại Sản Phẩm mới">
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-control" id="updateNgaySanXuat" placeholder="Ngày Sản Xuất mới">
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-control" id="updateNgayHetHan" placeholder="Ngày Hết Hạn mới">
+            </div>
+            <button class="btn btn-main" onclick="capNhatSanPham()">Cập Nhật Sản Phẩm</button>
+        </div>
+    
+        <!-- Form Xóa Sản Phẩm -->
+        <div id="formXoa" class="form hidden">
+            <div class="form-group">
+                <input type="text" class="form-control" id="deleteMaSanPham" placeholder="Mã Sản Phẩm cần xóa">
+            </div>
+            <button class="btn btn-main" onclick="xoaSanPham()">Xóa Sản Phẩm</button>
+        </div>
+    
+        <!-- Form Tìm Kiếm Sản Phẩm -->
+        <div id="formTimKiem" class="form hidden">
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchMaSanPham" placeholder="Mã Sản Phẩm cần tìm">
+            </div>
+            <button class="btn btn-main" onclick="timKiemSanPham()">Tìm Kiếm</button>
+        </div>
+
+        <!-- Khu vực hiển thị kết quả tìm kiếm -->
+        <div id="ketQuaTimKiem" class="mt-4"></div>
+    </div>    
+
+    <!-- Bootstrap và JQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Hiển thị form tương ứng
+        function hienThiForm(formId) {
+            // Ẩn tất cả các form
+            var forms = document.querySelectorAll('.form');
+            forms.forEach(function (form) {
+                form.classList.add('hidden');
+            });
+
+            // Hiển thị form được yêu cầu
+            var form = document.getElementById(formId);
+            if (form) {
+                form.classList.remove('hidden');
+            }
+        }
+
+        // Hàm hiển thị thông báo
+        function hienThiThongBao(message, isSuccess) {
+            var ketQuaThongBaoDiv = document.getElementById('ketQuaThongBao');
+            if (ketQuaThongBaoDiv) {
+                ketQuaThongBaoDiv.innerHTML = `<p>${message}</p>`;
+                ketQuaThongBaoDiv.style.color = isSuccess ? 'green' : 'red';
+            } else {
+                console.error('Phần tử ketQuaThongBao không tồn tại trong tài liệu HTML.');
+            }
+        }
+
+        // Hàm thêm sản phẩm mới
+        function themSanPham() {
+            var maSanPham = document.getElementById('maSanPhamThem').value;
+            var tenSanPham = document.getElementById('tenSanPhamThem').value;
+            var loaiSanPham = document.getElementById('loaiSanPhamThem').value;
+            var ngaySanXuat = document.getElementById('ngaySanXuatThem').value;
+            var ngayHetHan = document.getElementById('ngayHetHanThem').value;
+
+            var sanPham = {
+                maSanPham: maSanPham,
+                tenSanPham: tenSanPham,
+                loaiSanPham: loaiSanPham,
+                ngaySanXuat: ngaySanXuat,
+                ngayHetHan: ngayHetHan
+            };
+
+            fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sanPham),
+            })
+            .then(response => response.json())
+            .then(data => {
+                hienThiThongBao('Thêm sản phẩm thành công.', true);
+                // Thêm bất kỳ xử lý bổ sung nào ở đây, như làm mới danh sách sản phẩm
+            })
+            .catch(error => {
+                hienThiThongBao('Lỗi khi thêm sản phẩm: ' + error.message, false);
+            });
+        }
+
+
+        // Hàm cập nhật sản phẩm
+    function capNhatSanPham() {
+        var maSanPham = document.getElementById('updateMaSanPham').value;
+        var tenSanPham = document.getElementById('updateTenSanPham').value;
+        var loaiSanPham = document.getElementById('updateLoaiSanPham').value;
+        var ngaySanXuat = document.getElementById('updateNgaySanXuat').value;
+        var ngayHetHan = document.getElementById('updateNgayHetHan').value;
+
+        var sanPhamToUpdate = {
+            tenSanPham: tenSanPham,
+            loaiSanPham: loaiSanPham,
+            ngaySanXuat: ngaySanXuat,
+            ngayHetHan: ngayHetHan
+        };
+
+        fetch(`/api/products/${maSanPham}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sanPhamToUpdate),
+        })
+        .then(response => response.json())
+        .then(data => {
+            hienThiThongBao('Cập nhật sản phẩm thành công.', true);
+            // Thêm bất kỳ xử lý bổ sung nào ở đây
+        })
+        .catch(error => {
+            hienThiThongBao('Lỗi khi cập nhật sản phẩm: ' + error.message, false);
+        });
+    }
+
+
+            // Hàm xóa sản phẩm
+            function xoaSanPham() {
+                var maSanPham = document.getElementById('deleteMaSanPham').value;
+
+                fetch(`/api/products/${maSanPham}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Mã sản phẩm không tồn tại hoặc lỗi khi xóa sản phẩm.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hienThiThongBao('Xóa sản phẩm thành công.', true);
+                    // Xử lý sau khi xóa thành công
+                })
+                .catch((error) => {
+                    hienThiThongBao('Lỗi khi xóa sản phẩm: ' + error.message, false);
+                });
+            }
+
+            // Hàm tìm kiếm sản phẩm
+    function timKiemSanPham() {
+        var maSanPham = document.getElementById('searchMaSanPham').value;
+        var ketQuaDiv = document.getElementById('ketQuaTimKiem');
+
+        fetch(`/api/products/search/${maSanPham}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không tìm thấy sản phẩm.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            ketQuaDiv.innerHTML = ''; // Xóa kết quả tìm kiếm cũ
+
+            if (data && data.length > 0) {
+                data.forEach(product => {
+                    var ngaySanXuatFormatted = new Date(product.ngaySanXuat).toLocaleDateString();
+                    var ngayHetHanFormatted = new Date(product.ngayHetHan).toLocaleDateString();
+                    
+                    ketQuaDiv.innerHTML += `<div class="product-info">
+                        <p>Mã Sản Phẩm: ${product.maSanPham}</p>
+                        <p>Tên Sản Phẩm: ${product.tenSanPham}</p>
+                        <p>Loại Sản Phẩm: ${product.loaiSanPham}</p>
+                        <p>Ngày Sản Xuất: ${ngaySanXuatFormatted}</p>
+                        <p>Ngày Hết Hạn: ${ngayHetHanFormatted}</p>
+                    </div>`;
+                });
+            } else {
+                ketQuaDiv.innerHTML = '<p>Không tìm thấy sản phẩm.</p>';
+            }
+        })
+        .catch(error => {
+            ketQuaDiv.innerHTML = `<p>${error.message}</p>`;
+        });
+    }
+
+
+            // Hàm hiển thị thông báo
+            function hienThiThongBao(message, isSuccess) {
+                var ketQuaDiv = document.getElementById('ketQuaThongBao');
+                ketQuaDiv.innerHTML = `<p>${message}</p>`;
+                ketQuaDiv.style.color = isSuccess ? 'green' : 'red';
+            }
+    </script>
+</body>
+</html>
